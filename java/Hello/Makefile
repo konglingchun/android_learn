@@ -1,0 +1,3 @@
+
+all:Hello.java
+	javac $^

@@ -1,0 +1,84 @@
+android代码
+
+一、安装android所需的环境
+	./android_env_soft.sh
+
+二、下载repo
+	mkdir android
+	cd android
+
+	根据官网的指示，应该执行如下命令来下载repo文件：
+		curl https://android.git.kernel.org/repo > repo
+	但报出如下错误：
+		curl: (6) Couldn't resolve host 'android.git.kernel.org'
+	通过浏览器访问http://android.git.kernel.org/时也被报告无法找到服务器。
+	解决方案：
+		curl "http://php.webtutor.pl/en/wp-content/uploads/2011/09/repo" > repo  
+		chmod a+x repo  
+
+三、查看代码分支：
+	http://www.codeaurora.org/cgit/quic/la/platform/manifest/
+
+四、下载android代码
+	android2.3
+		./repo  init  -u  git://codeaurora.org/platform/manifest.git -b gingerbread
+		repo sync
+	
+	android4.4
+		./repo  init  -u  git://codeaurora.org/platform/manifest.git -b aosp-new/android-4.4.4_r2
+		repo sync出错：打开.repo目录下的manifest.xml文件（命令vim manifest.xml）并找到fetch属性，将fetch=".."修改为fetch="git://Android.git.linaro.org/"，保存并退出
+		repo sync
+
+五、编译
+	 . build/envsetup.sh
+	lunch
+		选择aosp_arm-eng
+	make clean;make
+
+六、创建android虚拟机：
+	export PATH=$PATH:~/share/android4.4/prebuilts/devtools/tools/
+	export ANDROID_SWT=~/share/android4.4/prebuilts/tools/linux-x86_64/swt/
+	使用android create avd 命令来创建一个新的Android 虚拟设备。
+	选项：
+		-t --target 新的AVD 的Target ID(必须)
+		-c --sdcard 指向一个共享的SD 存储卡的路径或是为新的AVD 定制的新SD 存储卡的容量大小
+		-p --path 新AVD 将被创建的位置路径
+		-n --name 新AVD 的名称(必须)
+		-f --force 强制创建(覆盖已存在的AVD)
+		-s --skin 新AVD 的皮肤
+
+	举例如下：
+
+	建一个名叫learn的AVD、Target ID=6、SD 存储卡容量512M、路径~/share/avd、皮肤QVGA
+	开启命令行（开始->运行，键入cmd），进入Android SDK tools 目录
+	使用android命令列出Target ID值：android list target
+
+	查看AVD：
+		android list avd
+	创建一个AVD：
+		mkdir ~/share/avd -p
+		android create avd -n learn -t 6 -c 512M -p ~/share/avd -s QVGA
+	运行指定的AVD：
+		emulator -avd learn
+
+七、运行android模拟器
+	export PATH=$PATH:~/share/android4.4/out/host/linux-x86/bin/
+	export ANDROID_PRODUCT_OUT=~/share/android4.4/out/target/product/generic
+	
+	emulator
+	
+	emulator运行需要四个文件，分别是Linux Kernel镜像zImage和Android镜像文件system.img、userdata.img和ramdisk.img。
+	执行emulator命令时，如果不带任何参数，则Linux Kernel镜像默认使用prebuilt/android-arm/kernel目录下的kernel-qemu文件，而Android镜像文件则默认使用ANDROID_PRODUCT_OUT目录下的system.img、userdata.img和ramdisk.img，也就是我们刚刚编译出来的镜像。
+	我们也可以以指定的镜像文件来运行模拟器，即运行emulator时，即：
+	emulator -kernel ./prebuilt/android-arm/kernel/kernel-qemu -sysdir ./out/target/product/generic -system system.img -data userdata.img -ramdisk ramdisk.img
+
+七、下载内核
+	mkdir linux_android
+	cd linux_android
+	git clone http://android.googlesource.com/kernel/goldfish.git
+	cd goldfish/
+	git branch -a
+	git checkout remotes/origin/android-3.4
+
+
+
